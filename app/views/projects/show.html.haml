@@ -26,5 +26,8 @@
       %ul
         Build artefacts
         - @build.artefacts.each do |artefact|
-          %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}"
+          - if artefact == 'coverage' # hack:(
+            %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}/index.html"
+          - else
+            %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}"
     %pre= @build.build_log

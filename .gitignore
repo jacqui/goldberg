@@ -5,9 +5,7 @@ db/*.sqlite3
 .bundle
 *.swp
 *.tmproj
-*.gem
 *.rbc
-Gemfile.lock
 log/*
 tmp/*
 tags
@@ -16,7 +14,6 @@ cscope.*
 tmtags
 db/schema.rb
 goldberg.ids
-.rvmrc
 coverage/*
 *.css
 config/goldberg.yml

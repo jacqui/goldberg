@@ -44,7 +44,7 @@ describe Project do
     end
   end
 
-  context "checkout" do
+  describe "checkout" do
     it "checks out the code for the project" do
       project = Project.new(:url => "git://some.url.git", :name => 'some_project', :branch => 'master')
       Environment.should_receive(:system).with('git clone --depth 1 git://some.url.git some_path/some_project/code --branch master').and_return(true)
@@ -52,7 +52,7 @@ describe Project do
     end
   end
 
-  context "delegation to latest build" do
+  describe "delegation to latest build" do
     [:number, :status, :build_log, :timestamp].each do |field|
       it "delegates latest_build_#{field} to the latest build" do
         project = Project.new
@@ -65,7 +65,7 @@ describe Project do
     end
   end
 
-  context "last complete build" do
+  describe "last complete build" do
     [:timestamp].each do |field|
       it "delegates last_complete_build_#{field} to the last complete build" do
         project = Factory(:project)
@@ -77,7 +77,7 @@ describe Project do
     end
   end
 
-  context "command" do
+  describe "command" do
     it "does not prefix bundler related command if Gemfile is missing" do
       project = Factory(:project)
       File.should_receive(:exists?).with(File.join(project.code_path, 'Gemfile')).and_return(false)
@@ -106,7 +106,7 @@ describe Project do
     end
   end
 
-  context "forcing a build" do
+  describe "forcing a build" do
     it "sets the build requested flag to true" do
       project = Factory(:project, :name => 'name')
       project.force_build
@@ -114,7 +114,7 @@ describe Project do
     end
   end
 
-  context "when to build" do
+  describe "when to build" do
     it "builds if there are no existing builds" do
       project = Project.new
       project.build_required?.should be_true
@@ -128,7 +128,7 @@ describe Project do
     end
   end
 
-  context "run build" do
+  describe "run build" do
     let(:project) { Factory(:project, :name => "goldberg") }
 
     before(:each) do
@@ -362,5 +362,23 @@ describe Project do
         project.checkout
       }.should raise_error
     end
+  end
+
+  describe "github" do
+    it "doesn't think random urls are on git" do
+      Factory(:project, :url => 'git://somewhereelse.com/repo.git').github_url.should be_nil
+    end
+
+    it "detects a git protocol url" do
+      Factory(:project, :url => 'git://github.com/some_user/some_repo.git').github_url.should == 'http://github.com/some_user/some_repo'
+    end
+
+    it "detects an http url" do
+      Factory(:project, :url => 'http://github.com/some_user/some_repo.git').github_url.should == 'http://github.com/some_user/some_repo'
+    end
+  end
+
+  describe 'loads the correct build_command' do
+
   end
 end

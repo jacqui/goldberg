@@ -1,7 +1,6 @@
 # Goldberg 1.0.0
 
-© Copyright 2010–2011 [C42 Engineering][]. All Rights Reserved.
-[![Build Status](http://goldberg.c42.in/projects/goldberg.png)](http://goldberg.c42.in/projects/goldberg)
+© Copyright 2010–2011 [C42 Engineering][]. All Rights Reserved. <a href='http://goldberg.c42.in/projects/goldberg'><img src='http://goldberg.c42.in/projects/goldberg.png' alt='Goldberg Build Status'></a>
 
 Goldberg is an alternative to [CruiseControl.rb][] that adheres to the same principles of being simple to use and easy to contribute to. It currently meets all common use cases of a lightweight CI server, and we plan to add more over time. A large majority of projects should be able to switch from CC.rb to Goldberg with little or no effort.
 
@@ -13,24 +12,31 @@ Visit [goldberg.c42.in][] to see a live Goldberg server.
 
 ### Prerequisites
 
-Git and Ruby (we usually use CRuby 1.9.2, but any flavour should work).
-RVM if you want to be able to run projects on different rubies.
-
-Your project should have a Gemfile for [Bundler][].
+* Ruby - CRuby 1.8.7/1.9.2 and JRuby 1.6.2 and upward are supported
+* Git (svn, hg and bzr are currently unsupported, but are in the roadmap)
+* RVM if you want to be able to run projects on different rubies.
+* Your project should have a Gemfile for [Bundler][].
 
 Goldberg is currently tested only on Linux/Mac OS X but should run on JRuby on Windows.
 
 ### Installation
-     
+
        # If you're on Ubuntu, you might need:
-       sudo apt-get install sqlite3 libsqlite3-dev
-     
+       sudo apt-get install sqlite3 libsqlite3-dev libncursesw5-dev
+
        git clone git://github.com/c42/goldberg.git
+       cd goldberg
        bundle install
        rake db:migrate
 
+### Setting up a production instance
+
+We suggest that Goldberg should be used behind apache, nginx or any such web server with passenger, unicorn or mongrel. If you don't have a setup that monitors and restarts processes, you should use a process monitoring tool like God or Monit to manage the server processes & restart them if they happen to die.
+
+A sample god script file <code>config/god-script.rb</code> is available with Goldberg. Details for setting up God can be found at [http://god.rubyforge.org/]
+
 ### Setting up a new repository
-     
+
        bin/goldberg add <url> <name> [--branch <branch_name>]
 
 By default it assumes the <code>master</code> branch. If you want to build on any other branch, use the -b --branch flag to specify it. The default command is <code>rake</code>, but you can also use "rake db:migrate && rake spec" if you have a rails project to build.
@@ -40,14 +46,19 @@ By default it assumes the <code>master</code> branch. If you want to build on an
        bin/goldberg remove <name>
 
 ### Starting Goldberg
-     
-       # Start the CI server and web front-end at port 4242.
-       bin/goldberg start [4242]
 
-### Stopping Goldberg
-     
-       # Stop a running CI server
-       bin/goldberg stop
+In development mode simply run:
+
+       rails server
+
+This will also start a daemon for building projects.
+
+In production mode, the web server & the build poller runs in different processes. The web server will have to be set up like any other Rails/Rack application. The poller will have to be run using:
+
+       # Start just the polling/building without a front-end
+       bin/goldberg start_poller
+       
+There's a god-script under config directory which can be used to start a poller as a daemon process monitored by [God](https://github.com/mojombo/god)
 
 ### Tracking build status
 
@@ -69,7 +80,7 @@ PS: Changing the frequency of poller to 1 second will not cause git calls every 
 #### Project based configuration
 
 Every project in goldberg can have its own custom configuration by means of adding (either on goldberg instance or by checking it in with the codebase) `goldberg_config.rb` at the root of your codebase. As of now only the following configurations can be overridden, but going further this configuration will be used to configure even more.
-     
+
       #Goldberg configuration
       Project.configure do |config|
         config.frequency = 20
@@ -88,37 +99,31 @@ Goldberg provides on_build_completion, on_build_failure, on_build_success & on_b
 
 The callbacks are part of goldberg_config.rb
 
-		#Goldberg callbacks
-		Project.configure do |config|
-		
-			config.on_build_completion do |build,notification,previous_build_status| 
-				# sending mail
-				notification.from('from@example.com').to('to@example.com').with_subject("build for #{build.project.name} #{build.status}").send
-			end
-			
-			config.on_build_success do |build,notification| 
-				# code to deploy on staging
-			end
-			
-			config.on_build_failure do |build,notification|
-				# post to IRC channel & send mail
-			end
+     #Goldberg callbacks
+    Project.configure do |config|
 
-			config.on_build_fixed do |build,notification|
-				# post to IRC channel & deploy on staging
-			end
-		end
-		
+      config.on_build_completion do |build,notification,previous_build_status|
+        # sending mail
+        notification.from('from@example.com').to('to@example.com').with_subject("build for #{build.project.name} #{build.status}").send
+      end
+
+      config.on_build_success do |build,notification|
+        # code to deploy on staging
+      end
+
+      config.on_build_failure do |build,notification|
+        # post to IRC channel & send mail
+      end
+
+      config.on_build_fixed do |build,notification|
+        # post to IRC channel & deploy on staging
+      end
+    end
+
 Assume you want to post a message on IRC channel & there is a gem that can be used to do so, you can simply require the gem at the start of the project_config.rb file & write the code to post message in any of the callbacks.
 
-### Setting up production instance
-
-We suggest that Goldberg should be used behind apache, ngin-x or any such web server with passenger, unicorn or mongrel. If you don't want such setup, you should use a process monitoring tool like God or Monit to manage the server processes & restart them if they happen to die.
-
-A sample god script file <code>config/god-script.rb</code> is available with Goldberg. Details for setting up God can be found at [http://god.rubyforge.org/]
-
 ### Help
-     
+
       # To get man page style help
       ./bin/goldberg help [command]
 

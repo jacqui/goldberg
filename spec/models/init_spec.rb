@@ -2,15 +2,15 @@ require "spec_helper"
 
 describe Init do
   it "adds a new project" do
-    Project.should_receive(:add).with(:url => 'url', :name => 'name', :command => nil, :branch => 'master')
+    Project.should_receive(:add).with(:url => 'url', :name => 'name', :branch => 'master')
     Rails.logger.should_receive(:info).with('name successfully added.')
-    Init.new.add('url','name','master')
+    Init.new.add('url', 'name', 'master')
   end
 
   it "adds a new project with a custom command" do
-    Project.should_receive(:add).with(:url => 'url', :name => 'name', :command => 'cmake', :branch => 'master')
+    Project.should_receive(:add).with(:url => 'url', :name => 'name', :branch => 'master')
     Rails.logger.should_receive(:info).with('name successfully added.')
-    Init.new.add('url','name', 'master', 'cmake')
+    Init.new.add('url', 'name', 'master')
   end
 
   it "removes the specified project" do
@@ -29,38 +29,6 @@ describe Init do
     project = Factory(:project, :name => 'a_project')
     Rails.logger.should_receive(:info).with(project.name)
     Init.new.list
-  end
-
-  it "starts the app on port 4242 if no port specified" do
-    Environment.should_receive(:exec).with("rackup -p 4242 -D -P #{File.join(ENV["GOLDBERG_PATH"], "pids", "goldberg.pid")} #{File.join(Rails.root, 'app', 'models', '..', '..', 'config.ru')}")
-    Init.new.start
-  end
-
-  it "starts the app on specified port if port specified" do
-    Environment.should_receive(:exec).with("rackup -p 4356 -D -P #{File.join(ENV["GOLDBERG_PATH"], "pids", "goldberg.pid")} #{File.join(Rails.root, 'app', 'models', '..', '..', 'config.ru')}")
-    Init.new.start(4356)
-  end
-
-  it "does not start the app if the pid file already exists" do
-    Paths.stub!(:pid).and_return("pid_path")
-    File.should_receive(:exist?).with("pid_path").and_return(true)
-    Rails.logger.should_receive(:info).with("Goldberg already appears to be running. Please run 'bin/goldberg stop' or delete the existing pid file.")
-    Init.new.start
-  end
-
-  it "stops the app and removes the pid file" do
-    Paths.stub!(:pid).and_return("pid_path")
-    File.should_receive(:exist?).with("pid_path").and_return(true)
-    Environment.should_receive(:exec).with("kill `cat pid_path`")
-    FileUtils.should_receive(:rm).with("pid_path")
-    Init.new.stop
-  end
-
-  it "prints a warning if attempting to stop with no pid file" do
-    Paths.stub!(:pid).and_return("pid_path")
-    File.should_receive(:exist?).with("pid_path").and_return(false)
-    Rails.logger.should_receive(:info).with("Goldberg does not appear to be running.")
-    Init.new.stop
   end
 
   it "continues on with the next project even if one build fails" do

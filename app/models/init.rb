@@ -1,8 +1,8 @@
 require "fileutils"
 
 class Init
-  def add(url, name, branch, command = nil)
-    Project.add(:url => url, :name => name, :command => command, :branch => branch)
+  def add(url, name, branch)
+    Project.add(:url => url, :name => name, :branch => branch)
     Rails.logger.info "#{name} successfully added."
   end
 
@@ -18,23 +18,6 @@ class Init
 
   def list
     Project.all.map(&:name).each { |name| Rails.logger.info name }
-  end
-
-  def start(port = 4242)
-    if !File.exist?(Paths.pid)
-      Environment.exec "rackup -p #{port} -D -P #{Paths.pid} #{File.join(File.dirname(__FILE__), '..', '..', 'config.ru')}"
-    else
-      Rails.logger.info "Goldberg already appears to be running. Please run 'bin/goldberg stop' or delete the existing pid file."
-    end
-  end
-
-  def stop
-    if File.exist?(Paths.pid)
-      Environment.exec "kill `cat #{Paths.pid}`"
-      FileUtils.rm(Paths.pid)
-    else
-      Rails.logger.info "Goldberg does not appear to be running."
-    end
   end
 
   def poll

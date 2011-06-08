@@ -1,8 +1,11 @@
-Project : <%= @project.name %><br/>
-Build Status : <%= @build.status %><br/>
+Project : <%= @project.name %><br>
+Build Status : <%= @build.status %><br>
 Build Page URL : <%= project_build_url(@project.name,@build) %>
-<% unless @build.change_list.blank? %>
-  Diff:<br/>
 
-  <p><%= @build.change_list %></p>
+<% unless @build.change_list.blank? %>
+  <p>
+    Diff:<br>
+
+    <%= @build.change_list %>
+  </p>
 <% end %>

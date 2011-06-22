@@ -6,6 +6,18 @@ Build Page URL : <%= project_build_url(:project_name => @project.name, :build_nu
   <p>
     Diff:<br>
 
-    <%= @build.change_list %>
+    <pre>
+      <%= @build.change_list %>
+    </pre>
+  </p>
+<% end %>
+
+<% unless @build.build_log.blank? %>
+  <p>
+    Build log:<br>
+
+    <pre>
+      <%= @build.build_log %>
+    </pre>
   </p>
 <% end %>

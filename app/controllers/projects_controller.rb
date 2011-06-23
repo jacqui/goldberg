@@ -1,4 +1,23 @@
 class ProjectsController < ApplicationController
+  def new
+    @project = Project.new
+    respond_to do |format|
+      format.html {}
+    end
+  end
+
+  def create
+    @name   = "olympics_2012"
+    @url    = "git@newsdev.ec2.nytimes.com:#{@name}.git"
+    @branch = "develop"
+    Init.add(@url, @name, @branch)
+
+    @project = Project.find_by_name(@name)
+    respond_to do |format|
+      format.html {}
+    end
+  end
+
   def show
     @project = Project.find_by_name(params[:project_name])
     if @project.nil?

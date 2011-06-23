@@ -9,6 +9,9 @@ Goldberg::Application.routes.draw do
 
   resources :projects, :only => 'index'
 
+  get '/projects/new' => 'projects#new', :as => :new_project
+  post '/projects/:project_name' => 'projects#create', :as => :project
+
   get '/projects/:project_name' => 'projects#show', :as => :project
   post '/projects/:project_name/builds' => 'projects#force', :as => :project_force
 

@@ -1,0 +1,26 @@
+- content_for(:head) do
+  = stylesheet_link_tag 'projects'
+
+- @title = "Goldberg - New Project"
+
+.past-builds
+  %h3 Current Projects
+  %ul
+    - @projects.each do |project|
+      %li.build
+        %a{:href => project_path(:project_name => project.name)}
+.latest-build{:class => "clearfix"}
+  %div.project_heading
+    %form{:method => 'post', :action => project_path}
+      %input{:type => 'submit', :value => 'force build'}
+    %h2.project
+      New Project
+    = form_for(@project) do |f|
+      = f.label :name
+      = f.text_field :name
+      = f.label :url
+      = f.text_field :url
+      = f.label :branch
+      = f.text_field :branch
+      = f.submit
+

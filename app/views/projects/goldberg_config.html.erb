@@ -1,0 +1,44 @@
+Project.configure do |config|
+  # in seconds
+  config.frequency = <%= @project.frequency %>
+  # use Ruby Enterprise Edition through RVM
+  config.ruby = <%= @project.ruby %>
+  # Don't install development group's gems
+  config.environment_variables = {"BUNDLE_WITHOUT" => "development"}
+
+  config.timeout = 10.minutes
+
+  # How do you run the test suite? Make sure to migrate the database first!
+  # We run the command with 'bash -c' to preserve the output of multiple '&&'ed commands
+  config.command = 'bash -c "RAILS_ENV=test <%= @project.build_command %>"'
+
+  config.on_build_completion do |build,notification,previous_build_status|
+    # if the build passed the last time, and it is still passing, don't bother emailing us
+    unless previous_build_status == 'passed' && previous_build_status == build.status
+      # Send an email notification
+      # TODO: add notify_address to projects table
+      notification.from('no-reply@nytimes.com').to('jacqui.maher@nytimes.com').with_subject("[<%= @project.name %> CI] build #{build.status}").send
+    end
+
+    # RCov setup info - move the coverage directory to the build's artefacts path so it can be linked in the UI
+    coverage_directory = File.join(build.project.code_path, 'coverage')
+    if File.exists?(coverage_directory)
+      move_command = "mv #{coverage_directory} #{build.artefacts_path}"
+      puts move_command
+      `#{move_command}`
+    end
+  end
+
+  # We don't typically use these hooks.
+  config.on_build_success do |build,notification|
+    # code to deploy on staging
+  end
+
+  config.on_build_failure do |build,notification|
+    # post to IRC channel & send mail
+  end
+
+  config.on_build_fixed do |build,notification|
+    # post to IRC channel & deploy on staging
+  end
+end

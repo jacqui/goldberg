@@ -1,10 +1,18 @@
 class GlobalConfig
 
-  DEFAULT_CONFIG = {'frequency' => 10}
+  DEFAULT_CONFIG = {'frequency' => 10, 'ruby' => 'ree-1.8.7-2011.03', 'timeout' => 10.minutes}
 
   class << self
+    def ruby
+      config_hash['ruby']
+    end
+
     def frequency
       config_hash['frequency']
+    end
+
+    def timeout
+      config_hash['timeout']
     end
 
     def config_hash

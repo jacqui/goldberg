@@ -4,11 +4,19 @@ class ProjectsController < ApplicationController
   end
 
   def create
-    @project = Project.new(params[:project])
-    if @project.save
-      redirect_to root_path, :notice => "#{@project.name} successfully added."
+    project_params = params[:project].merge(:ruby => GlobalConfig.ruby)
+    result = Project.command_line_create(params[:project])
+    if result && result[:status] == 'succeeded'
+      @project = result[:project]
+      @build = @project.latest_build
+      @goldberg_config = render_to_string(:action => :goldberg_config, :formats => [:txt], :layout => false)
+      Rails.logger.debug @goldberg_config
+      flash[:notice] = "#{@project.name} successfully added. Make sure to copy and commit your goldberg_config.rb file!"
+      render :action => :show
     else
-      flash[:error] = "There was a problem adding the project."
+      @project = Project.new(params[:project])
+      flash[:error] = "There was a problem adding the project: #{result[:output]}"
+
       render :action => :new
     end
   end
@@ -18,6 +26,9 @@ class ProjectsController < ApplicationController
     if @project.nil?
       render :text => 'Unknown project', :status => :not_found
     else
+      @goldberg_config = render_to_string(:action => :goldberg_config, :formats => [:txt], :layout => false)
+      Rails.logger.debug @goldberg_config
+
       @build = @project.latest_build
       respond_to do |format|
         format.html {}

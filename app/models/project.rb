@@ -10,6 +10,40 @@ class Project < ActiveRecord::Base
 
   delegate :frequency, :ruby, :environment_string, :timeout, :to => :config
 
+  def self.command_line_create(options)
+    project_url = options.delete(:url)
+    project_name = options.delete(:name)
+    project_branch = options.delete(:branch)
+
+    return false if [project_url, project_name, project_branch].compact.blank?
+
+    Bundler.with_clean_env do
+      Env['BUNDLE_GEMFILE'] = nil
+      Env["RUBYOPT"] = nil # having RUBYOPT was causing problems while doing bundle install resulting in gems not being installed - aakash
+      Env['RAILS_ENV'] = nil
+
+      RVM.prepare_ruby(GlobalConfig.ruby, "goldberg")
+      RVM.trust_rvmrc(Rails.root)
+
+      go_to_rails_root = "cd #{Rails.root}"
+
+      add_command = "#{Rails.root.join('bin', 'goldberg')} add #{project_url} #{project_name} --branch #{project_branch}"
+
+      full_command = [RVM.use_script(GlobalConfig.ruby, "goldberg"), go_to_rails_root, add_command].compact.join(' ; ')
+
+      Rails.logger.info "Running '#{full_command}'"
+      output = `#{full_command}`
+      output_lines = output.split(/\n/)
+      if $?.success? && output_lines.last =~ /successfully added/
+        project = Project.where(:name => project_name).first
+        { :status => 'succeeded', :output => output, :project => project }
+      else
+        { :status => 'failed', :output => output, :project => nil }
+
+      end
+    end
+  end
+
   def self.add(options)
     project = Project.new(:name => options[:name], :url => options[:url], :branch => options[:branch])
     if project.checkout

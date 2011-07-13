@@ -46,9 +46,9 @@ module RVM
       "source #{rvm_script_path}"
     end
 
-    def prepare_ruby(ruby)
+    def prepare_ruby(ruby, gemset = 'global')
       return unless installed?
-      Environment.system("#{use_script(ruby, 'global')} && (gem list | grep bundler) || gem install bundler")
+      Environment.system("#{use_script(ruby, gemset)} && (gem list | grep bundler) || gem install bundler")
     end
 
     def trust_rvmrc(project_root)

@@ -31,3 +31,10 @@
           - else
             %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}"
     %pre= @build.build_log
+
+
+#all-projects
+  .project_heading
+    %h1 Rails.root/goldberg_config.rb
+  %pre
+    = @goldberg_config

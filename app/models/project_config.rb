@@ -4,8 +4,8 @@ class ProjectConfig
 
   def initialize
     @frequency = 20
-    @ruby = RUBY_VERSION
-    @rake_task = :default
+    @ruby = GlobalConfig.ruby
+    @rake_task = :spec
     @environment_variables = {}
     @build_completion_callbacks = []
     @build_failure_callbacks = []

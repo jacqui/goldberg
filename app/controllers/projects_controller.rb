@@ -1,4 +1,18 @@
 class ProjectsController < ApplicationController
+  def new
+    @project = Project.new
+  end
+
+  def create
+    @project = Project.new(params[:project])
+    if @project.save
+      redirect_to root_path, :notice => "#{@project.name} successfully added."
+    else
+      flash[:error] = "There was a problem adding the project."
+      render :action => :new
+    end
+  end
+
   def show
     @project = Project.find_by_name(params[:project_name])
     if @project.nil?

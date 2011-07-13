@@ -10,6 +10,9 @@ $dark-yellow: #f0f086;
 $light-grey: #ccc;
 $dark-grey: #444;
 
+.notice { background: $dark-green; }
+.error {background: $dark-red; padding: 8px; color: #fff; margin: 5px;}
+
 h2.project {
   em.project_ruby {
     font-size: 12px;

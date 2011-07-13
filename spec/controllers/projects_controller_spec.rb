@@ -8,6 +8,18 @@ describe ProjectsController do
     assigns[:project].should == project
   end
 
+  it "creates a project" do
+    post :create, :project => { :url => 'git@newsdev.prvt.nytimes.com:foobar.git', :branch => 'develop', :name => 'Foobar'}
+    response.should redirect_to(root_path)
+  end
+
+  it "displays an error message if unable to create the project" do
+    post :create, :project => { }
+    response.should be_ok
+    response.should render_template(:new)
+    flash[:error].should =~ /There was a problem adding the project/
+  end
+
   it "allows forcing a build" do
     project = Factory.create(:project, :name => 'some_project')
     @request.env['HTTP_REFERER'] = 'http://referer/'

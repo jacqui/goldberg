@@ -1,0 +1,27 @@
+- content_for(:head) do
+  = stylesheet_link_tag 'projects'
+
+- @title = "Goldberg - New Project"
+
+#all-projects
+  %div.project_heading
+    %h1= @title
+
+  - if flash[:notice]
+    %div.notice= flash[:notice]
+  - if flash[:error]
+    %div.error= flash[:error]
+
+  = form_for(@project) do |f|
+    %div.input
+      = f.label :name
+      = f.text_field :name
+    %div.input
+      = f.label :url
+      = f.text_field :url
+    %div.input
+      = f.label :branch
+      = f.text_field :branch
+
+    = f.submit
+

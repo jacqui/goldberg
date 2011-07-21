@@ -26,7 +26,7 @@
       %ul
         Build artefacts
         - @build.artefacts.each do |artefact|
-          - if artefact == 'coverage' # hack:(
+          - if artefact.include?('coverage') # hack:(
             %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}/index.html"
           - else
             %li= link_to artefact, "/projects/#{@project.name}/builds/#{@build.number}/artefacts/#{artefact}"
